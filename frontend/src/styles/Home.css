@@ -1,0 +1,17 @@
+/* Car list container */
+.container .d-flex.flex-wrap {
+  justify-content: space-around;
+}
+
+/* CarCard adjustments */
+.card img {
+  height: 180px;
+  object-fit: cover;
+}
+.card-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+.card-text {
+  font-size: 0.95rem;
+}

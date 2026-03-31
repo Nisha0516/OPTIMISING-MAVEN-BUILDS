@@ -1,0 +1,568 @@
+/* Emergency Button - Fixed Position (Bottom Right) */
+.emergency-button {
+  position: fixed !important;
+  bottom: 2rem !important;
+  right: 2rem !important;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 1rem 1.75rem !important;
+  border-radius: 50px !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5),
+              0 0 0 0 rgba(239, 68, 68, 0.7) !important;
+  transition: all 0.3s ease !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  animation: emergency-pulse 2s infinite !important;
+}
+
+.emergency-button:hover {
+  transform: scale(1.05) translateY(-2px) !important;
+  box-shadow: 0 12px 32px rgba(239, 68, 68, 0.6) !important;
+}
+
+.emergency-button:active {
+  transform: scale(0.98) !important;
+}
+
+.emergency-icon {
+  font-size: 1.25rem !important;
+  animation: shake 0.5s infinite alternate !important;
+}
+
+.emergency-text {
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+}
+
+@keyframes emergency-pulse {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5),
+                0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.7),
+                0 0 0 10px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes shake {
+  0% { transform: rotate(-5deg); }
+  100% { transform: rotate(5deg); }
+}
+
+/* Modal Overlay */
+.emergency-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10000 !important;
+  animation: fadeIn 0.2s ease !important;
+  padding: 1rem !important;
+}
+
+/* Modal Container */
+.emergency-modal {
+  background: white !important;
+  border-radius: 20px !important;
+  max-width: 600px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3) !important;
+  animation: slideUp 0.3s ease !important;
+}
+
+/* Modal Header */
+.emergency-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 1.5rem 2rem !important;
+  border-bottom: 3px solid #fee2e2 !important;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+  border-radius: 20px 20px 0 0 !important;
+}
+
+.emergency-modal-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+.emergency-icon-large {
+  font-size: 2.5rem !important;
+  animation: shake 0.5s infinite alternate !important;
+}
+
+.emergency-modal-header h2 {
+  margin: 0 !important;
+  color: #991b1b !important;
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+}
+
+.emergency-close-btn {
+  background: none !important;
+  border: none !important;
+  font-size: 2rem !important;
+  cursor: pointer !important;
+  color: #991b1b !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  line-height: 1 !important;
+}
+
+.emergency-close-btn:hover:not(:disabled) {
+  background: rgba(153, 27, 27, 0.1) !important;
+}
+
+.emergency-close-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Modal Body */
+.emergency-modal-body {
+  padding: 2rem !important;
+}
+
+.emergency-info-box {
+  background: #dbeafe !important;
+  border: 2px solid #3b82f6 !important;
+  border-radius: 12px !important;
+  padding: 1.25rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.emergency-info-text {
+  margin: 0 !important;
+  color: #1e3a8a !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+}
+
+.emergency-info-text strong {
+  color: #1e40af !important;
+}
+
+/* Emergency Section */
+.emergency-section {
+  margin-bottom: 1.75rem !important;
+}
+
+.emergency-section-label {
+  display: block !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+  color: #1f2937 !important;
+  font-size: 1rem !important;
+}
+
+/* Emergency Types Grid */
+.emergency-types-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 0.875rem !important;
+}
+
+.emergency-type-btn {
+  padding: 1rem !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  background: white !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  text-align: left !important;
+  position: relative !important;
+  min-height: 60px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.emergency-type-btn:hover:not(:disabled) {
+  border-color: #ef4444 !important;
+  background: #fef2f2 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2) !important;
+}
+
+.emergency-type-btn.selected {
+  border-color: #ef4444 !important;
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border-width: 3px !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+}
+
+.emergency-type-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+.emergency-type-btn.priority-critical {
+  border-left-width: 5px !important;
+  border-left-color: #dc2626 !important;
+}
+
+.emergency-type-btn.priority-high {
+  border-left-width: 5px !important;
+  border-left-color: #f59e0b !important;
+}
+
+.emergency-type-label {
+  font-size: 0.95rem !important;
+}
+
+.critical-badge {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.5rem !important;
+  background: #dc2626 !important;
+  color: white !important;
+  font-size: 0.65rem !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Description Input */
+.emergency-description-input {
+  width: 100% !important;
+  padding: 0.875rem !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  font-family: inherit !important;
+  font-size: 0.9rem !important;
+  resize: vertical !important;
+  transition: all 0.2s ease !important;
+}
+
+.emergency-description-input:focus {
+  outline: none !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.emergency-description-input:disabled {
+  background: #f3f4f6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Location Status */
+.location-status {
+  padding: 1.25rem !important;
+  border-radius: 10px !important;
+  margin-top: 0.5rem !important;
+}
+
+.location-status.loading {
+  background: #fef3c7 !important;
+  border: 2px solid #f59e0b !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+.location-spinner {
+  width: 20px !important;
+  height: 20px !important;
+  border: 3px solid #f59e0b !important;
+  border-top-color: transparent !important;
+  border-radius: 50% !important;
+  animation: spin 0.6s linear infinite !important;
+}
+
+.location-status.success {
+  background: #d1fae5 !important;
+  border: 2px solid #10b981 !important;
+}
+
+.location-success-text {
+  margin: 0 0 0.75rem 0 !important;
+  color: #065f46 !important;
+  font-size: 0.95rem !important;
+}
+
+.location-coords {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.location-coords small {
+  color: #047857 !important;
+  font-family: 'Courier New', monospace !important;
+  font-size: 0.85rem !important;
+}
+
+.location-map-link {
+  display: inline-block !important;
+  color: #059669 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  font-size: 0.9rem !important;
+  padding: 0.5rem 1rem !important;
+  background: white !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+.location-map-link:hover {
+  background: #ecfdf5 !important;
+  transform: translateX(3px) !important;
+}
+
+.location-status.error {
+  background: #fef2f2 !important;
+  border: 2px solid #f87171 !important;
+}
+
+.location-error-text {
+  margin: 0 0 0.5rem 0 !important;
+  color: #991b1b !important;
+  font-size: 0.95rem !important;
+}
+
+.location-error-desc {
+  margin: 0 0 1rem 0 !important;
+  color: #b91c1c !important;
+  font-size: 0.85rem !important;
+}
+
+.retry-location-btn {
+  background: #dc2626 !important;
+  color: white !important;
+  border: none !important;
+  padding: 0.625rem 1.25rem !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.retry-location-btn:hover:not(:disabled) {
+  background: #b91c1c !important;
+  transform: translateY(-2px) !important;
+}
+
+.retry-location-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+.location-manual-note {
+  margin: 1rem 0 0 0 !important;
+  font-size: 0.85rem !important;
+  color: #6b7280 !important;
+  font-style: italic !important;
+}
+
+/* Action Buttons */
+.emergency-actions {
+  display: flex !important;
+  gap: 1rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.btn-emergency-submit {
+  flex: 1 !important;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 1.125rem 1.5rem !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.btn-emergency-submit:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4) !important;
+}
+
+.btn-emergency-submit:disabled {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.btn-emergency-cancel {
+  flex: 1 !important;
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  border: 2px solid #d1d5db !important;
+  padding: 1.125rem 1.5rem !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-emergency-cancel:hover:not(:disabled) {
+  background: #e5e7eb !important;
+  border-color: #9ca3af !important;
+}
+
+.btn-emergency-cancel:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+.loading-spinner-small {
+  width: 16px !important;
+  height: 16px !important;
+  border: 2px solid white !important;
+  border-top-color: transparent !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  animation: spin 0.6s linear infinite !important;
+}
+
+/* Emergency Contacts */
+.emergency-contacts-section {
+  border-top: 2px solid #f3f4f6 !important;
+  padding-top: 1.5rem !important;
+  margin-top: 0.5rem !important;
+}
+
+.emergency-contacts-label {
+  text-align: center !important;
+  color: #6b7280 !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 1rem !important;
+  font-weight: 600 !important;
+}
+
+.emergency-contact-buttons {
+  display: flex !important;
+  gap: 0.875rem !important;
+}
+
+.contact-btn {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.875rem 1rem !important;
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.contact-btn.support {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+.contact-btn.emergency-services {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+}
+
+.contact-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .emergency-button {
+    bottom: 1rem !important;
+    right: 1rem !important;
+    padding: 0.875rem 1.5rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .emergency-icon {
+    font-size: 1.1rem !important;
+  }
+
+  .emergency-modal {
+    margin: 0.5rem !important;
+    max-height: 95vh !important;
+  }
+
+  .emergency-modal-header {
+    padding: 1.25rem !important;
+  }
+
+  .emergency-icon-large {
+    font-size: 2rem !important;
+  }
+
+  .emergency-modal-header h2 {
+    font-size: 1.4rem !important;
+  }
+
+  .emergency-modal-body {
+    padding: 1.5rem !important;
+  }
+
+  .emergency-types-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .emergency-actions {
+    flex-direction: column !important;
+  }
+
+  .emergency-contact-buttons {
+    flex-direction: column !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .emergency-button,
+  .emergency-modal-overlay {
+    display: none !important;
+  }
+}

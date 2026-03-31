@@ -1,0 +1,13 @@
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table th {
+  background-color: #343a40;
+  color: #fff;
+}
+
+.table td button {
+  margin-right: 5px;
+}

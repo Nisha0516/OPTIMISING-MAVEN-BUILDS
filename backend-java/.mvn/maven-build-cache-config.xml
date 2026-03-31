@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Maven Build Cache Configuration
+  ================================
+  This file enables intelligent caching of compiled classes.
+  If source files are unchanged, subsequent `mvnw compile` runs will be
+  completed in seconds by restoring .class files from this local cache.
+  
+  Reference: https://maven.apache.org/extensions/maven-build-cache-extension/
+-->
+<cache xmlns="http://maven.apache.org/BUILD-CACHE-CONFIG/1.0.0"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://maven.apache.org/BUILD-CACHE-CONFIG/1.0.0
+                           https://maven.apache.org/xsd/build-cache-config-1.0.0.xsd">
+
+    <configuration>
+        <!-- Enable the build cache -->
+        <enabled>true</enabled>
+        <!-- Use SHA-256 for content hashing (more reliable than MD5) -->
+        <hashAlgorithm>SHA-256</hashAlgorithm>
+        
+        <!-- Store the cache locally on disk -->
+        <local>
+            <enabled>true</enabled>
+            <maxBuildsCached>5</maxBuildsCached>
+        </local>
+        
+        <!-- Remote cache is disabled – only local disk cache for this project -->
+        <remote>
+            <enabled>false</enabled>
+        </remote>
+    </configuration>
+
+    <executionControl>
+        <runAlways>
+            <!-- Never cache test phase – always execute tests fresh -->
+            <goalsLists>
+                <goalsList>
+                    <goals>
+                        <goal>test</goal>
+                    </goals>
+                </goalsList>
+            </goalsLists>
+        </runAlways>
+    </executionControl>
+</cache>

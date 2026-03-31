@@ -1,0 +1,74 @@
+/* General Reset */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+/* Navbar */
+.navbar {
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 50px;
+  padding: 8px 20px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+}
+
+/* Cards */
+.card {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: none;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Forms */
+.form-control {
+  border-radius: 50px;
+  padding: 10px;
+}
+
+/* Tables */
+table {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+table th, table td {
+  vertical-align: middle !important;
+}
+
+/* Headings */
+h2, h4 {
+  color: #343a40;
+  margin-bottom: 20px;
+}
+
+/* Footer */
+footer {
+  background-color: #343a40;
+  color: #fff;
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .d-flex.flex-wrap {
+    flex-direction: column;
+    align-items: center;
+  }
+}
