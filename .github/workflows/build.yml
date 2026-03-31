@@ -31,17 +31,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Fix: give mvnw execute permission (required on Linux/macOS)
-      - name: 🔧 Make mvnw executable
-        run: chmod +x backend-java/mvnw
-
       - name: ⏱️ Record Build Start Time
         run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
 
       # Unoptimized: single thread, no dependency cache, full clean
       - name: 🐌 Run Unoptimized Build (Single Thread)
         working-directory: backend-java
-        run: ./mvnw clean compile -T 1 -DskipTests=true --no-transfer-progress
+        run: |
+          chmod +x ./mvnw
+          ./mvnw clean compile -T 1 -DskipTests=true --no-transfer-progress
 
       - name: ⏱️ Display Unoptimized Build Time
         run: |
@@ -71,10 +69,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Fix: give mvnw execute permission (required on Linux/macOS)
-      - name: 🔧 Make mvnw executable
-        run: chmod +x backend-java/mvnw
-
       # OPTIMIZATION 1: Cache ~/.m2/repository between pipeline runs
       # Key = OS + hash of pom.xml (auto-invalidates when deps change)
       - name: 📦 Cache Maven Dependencies (~/.m2)
@@ -92,6 +86,7 @@ jobs:
       - name: ⚡ Run Optimized Build (Parallel Threads + Cache)
         working-directory: backend-java
         run: |
+          chmod +x ./mvnw
           echo "Running with optimizations:"
           echo "  ✅ Parallel threads: -T 1C (from .mvn/maven.config)"
           echo "  ✅ Maven .m2 dependency cache restored"
@@ -111,6 +106,7 @@ jobs:
       - name: 🏆 Incremental Build Demo (Cache Hit — Should Be Instant)
         working-directory: backend-java
         run: |
+          chmod +x ./mvnw
           START=$(date +%s)
           ./mvnw compile -DskipTests=true --no-transfer-progress
           END=$(date +%s)
