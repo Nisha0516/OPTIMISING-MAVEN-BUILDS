@@ -1,63 +1,48 @@
 name: 🚀 Car Rental — Optimized Maven Build CI
 
-# ──────────────────────────────────────────────────────────────
-# TRIGGER: This pipeline runs automatically on every git push
-# and every Pull Request to the main/master branch.
-# ──────────────────────────────────────────────────────────────
 on:
   push:
-    branches:
-      - main
-      - master
-    paths:
-      - 'backend-java/**'   # Only trigger when backend files change
+    branches: [main, master]
+    paths: ['backend-java/**', '.github/workflows/**']
   pull_request:
-    branches:
-      - main
-      - master
-    paths:
-      - 'backend-java/**'
+    branches: [main, master]
 
-# ──────────────────────────────────────────────────────────────
-# JOBS: The pipeline has two jobs to demonstrate optimization.
-# Job 1: Unoptimized build (BEFORE)  → single thread, no cache
-# Job 2: Optimized build  (AFTER)    → parallel threads + cache
-# ──────────────────────────────────────────────────────────────
+# Opt into Node.js 24 to avoid deprecation warnings
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
 
   # ============================================================
   # JOB 1: BEFORE — Unoptimized Baseline Build
-  # Purpose: Demonstrates how slow Maven is WITHOUT optimization
+  # Shows how slow Maven is without any optimization
   # ============================================================
   build-unoptimized:
     name: "📊 BEFORE — Unoptimized Build (1 Thread, No Cache)"
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Download the source code from GitHub
       - name: 📥 Checkout Source Code
         uses: actions/checkout@v4
 
-      # Step 2: Install Java 17 (same version used locally)
       - name: ☕ Set up Java 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'temurin'   # Eclipse Temurin = fast, free OpenJDK
+          distribution: 'temurin'
 
-      # Step 3: Record the start time for benchmarking
+      # Fix: give mvnw execute permission (required on Linux/macOS)
+      - name: 🔧 Make mvnw executable
+        run: chmod +x backend-java/mvnw
+
       - name: ⏱️ Record Build Start Time
         run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
 
-      # Step 4: Run the UNOPTIMIZED build
-      # -T 1         → Force single thread (no parallelism)
-      # -DskipTests  → Skip unit tests (focus on compile speed)
-      # NO cache     → Fresh compile every time (worst case)
+      # Unoptimized: single thread, no dependency cache, full clean
       - name: 🐌 Run Unoptimized Build (Single Thread)
         working-directory: backend-java
         run: ./mvnw clean compile -T 1 -DskipTests=true --no-transfer-progress
 
-      # Step 5: Calculate and display the total build time
       - name: ⏱️ Display Unoptimized Build Time
         run: |
           END_TIME=$(date +%s)
@@ -69,35 +54,29 @@ jobs:
 
   # ============================================================
   # JOB 2: AFTER — Fully Optimized Build
-  # Purpose: Demonstrates all 3 optimization techniques
+  # All 3 optimization techniques applied
   # ============================================================
   build-optimized:
     name: "⚡ AFTER — Optimized Build (16 Threads + Dependency Cache)"
     runs-on: ubuntu-latest
-    # This job only runs AFTER the unoptimized job completes
-    # so we can compare results clearly in the GitHub UI
     needs: build-unoptimized
 
     steps:
-      # Step 1: Download the source code from GitHub
       - name: 📥 Checkout Source Code
         uses: actions/checkout@v4
 
-      # Step 2: Install Java 17
       - name: ☕ Set up Java 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # ─────────────────────────────────────────────────────────
-      # OPTIMIZATION 1: Maven Dependency Cache
-      # GitHub Actions caches the ~/.m2/repository folder between
-      # pipeline runs. This means Maven never re-downloads JARs
-      # on subsequent pushes — just like a local build.
-      # Cache key is based on pom.xml — if dependencies change,
-      # the cache is automatically invalidated and rebuilt.
-      # ─────────────────────────────────────────────────────────
+      # Fix: give mvnw execute permission (required on Linux/macOS)
+      - name: 🔧 Make mvnw executable
+        run: chmod +x backend-java/mvnw
+
+      # OPTIMIZATION 1: Cache ~/.m2/repository between pipeline runs
+      # Key = OS + hash of pom.xml (auto-invalidates when deps change)
       - name: 📦 Cache Maven Dependencies (~/.m2)
         uses: actions/cache@v4
         with:
@@ -106,28 +85,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Step 3: Record start time
       - name: ⏱️ Record Build Start Time
         run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
 
-      # ─────────────────────────────────────────────────────────
-      # OPTIMIZATION 2: Parallel Thread Compilation
-      # -T 1C = 1 thread per CPU core on the GitHub runner
-      # GitHub's ubuntu-latest runner has 4 CPU cores available
-      # ─────────────────────────────────────────────────────────
+      # OPTIMIZATION 2 & 3: Parallel threads from maven.config + compiler flags from pom.xml
       - name: ⚡ Run Optimized Build (Parallel Threads + Cache)
         working-directory: backend-java
         run: |
           echo "Running with optimizations:"
-          echo "  ✅ Parallel threads: -T 1C (1 per CPU core)"
-          echo "  ✅ Maven dependency cache: restored from ~/.m2"
-          echo "  ✅ Skip tests: -DskipTests=true"
-          echo "  ✅ Compiler fork: enabled in pom.xml"
-          echo "  ✅ JVM TieredStopAtLevel=1: enabled in pom.xml"
+          echo "  ✅ Parallel threads: -T 1C (from .mvn/maven.config)"
+          echo "  ✅ Maven .m2 dependency cache restored"
+          echo "  ✅ Compiler fork + JVM TieredStopAtLevel=1 (from pom.xml)"
           echo "──────────────────────────────────────────────"
           ./mvnw clean compile -DskipTests=true --no-transfer-progress
 
-      # Step 5: Display the optimized build time
       - name: ⏱️ Display Optimized Build Time
         run: |
           END_TIME=$(date +%s)
@@ -136,27 +107,18 @@ jobs:
           echo "  ✅ OPTIMIZED BUILD TIME: ${ELAPSED} seconds"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-      # ─────────────────────────────────────────────────────────
-      # BONUS: Second compile run — demonstrates incremental cache
-      # "Nothing to compile - all classes are up to date"
-      # This is the most powerful demo: ~0 seconds compile time!
-      # ─────────────────────────────────────────────────────────
-      - name: 🏆 Incremental Build Demo (Cache Hit — Should Be ~2 Seconds)
+      # BONUS: Run compile again — nothing changed, should be instant
+      - name: 🏆 Incremental Build Demo (Cache Hit — Should Be Instant)
         working-directory: backend-java
         run: |
-          echo "Running compile AGAIN without any source changes..."
-          echo "Maven should detect nothing changed and skip compilation."
-          echo "──────────────────────────────────────────────"
           START=$(date +%s)
           ./mvnw compile -DskipTests=true --no-transfer-progress
           END=$(date +%s)
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "  🏆 INCREMENTAL BUILD TIME: $((END - START)) seconds"
-          echo "  Expected message: 'Nothing to compile - all classes are up to date'"
+          echo "  Expected: 'Nothing to compile - all classes are up to date'"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-      # Step 6: Upload compiled classes as an artifact
-      # This proves the build produced real output
       - name: 📤 Upload Compiled Classes as Artifact
         uses: actions/upload-artifact@v4
         with:
