@@ -1,123 +1,55 @@
-name: 🚀 Car Rental — Optimized Maven Build CI
+name: Backend Java CI
 
 on:
   push:
-    branches: [main, master]
-    paths: ['backend-java/**', '.github/workflows/**']
+    branches:
+      - main
+      - master
+    paths:
+      - "backend-java/**"
+      - ".github/workflows/build.yml"
   pull_request:
-    branches: [main, master]
+    branches:
+      - main
+      - master
+    paths:
+      - "backend-java/**"
+      - ".github/workflows/build.yml"
 
-# Opt into Node.js 24 to avoid deprecation warnings
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  contents: read
 
 jobs:
-
-  # ============================================================
-  # JOB 1: BEFORE — Unoptimized Baseline Build
-  # Shows how slow Maven is without any optimization
-  # ============================================================
-  build-unoptimized:
-    name: "📊 BEFORE — Unoptimized Build (1 Thread, No Cache)"
+  build:
+    name: Build backend-java
     runs-on: ubuntu-latest
 
-    steps:
-      - name: 📥 Checkout Source Code
-        uses: actions/checkout@v4
-
-      - name: ☕ Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: ⏱️ Record Build Start Time
-        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
-
-      # Unoptimized: single thread, no dependency cache, full clean
-      - name: 🐌 Run Unoptimized Build (Single Thread)
+    defaults:
+      run:
         working-directory: backend-java
-        run: |
-          chmod +x ./mvnw
-          ./mvnw clean compile -T 1 -DskipTests=true --no-transfer-progress
-
-      - name: ⏱️ Display Unoptimized Build Time
-        run: |
-          END_TIME=$(date +%s)
-          ELAPSED=$((END_TIME - START_TIME))
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  ❌ UNOPTIMIZED BUILD TIME: ${ELAPSED} seconds"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-
-  # ============================================================
-  # JOB 2: AFTER — Fully Optimized Build
-  # All 3 optimization techniques applied
-  # ============================================================
-  build-optimized:
-    name: "⚡ AFTER — Optimized Build (16 Threads + Dependency Cache)"
-    runs-on: ubuntu-latest
-    needs: build-unoptimized
 
     steps:
-      - name: 📥 Checkout Source Code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: ☕ Set up Java 17
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          cache-dependency-path: backend-java/pom.xml
 
-      # OPTIMIZATION 1: Cache ~/.m2/repository between pipeline runs
-      # Key = OS + hash of pom.xml (auto-invalidates when deps change)
-      - name: 📦 Cache Maven Dependencies (~/.m2)
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - name: Make Maven wrapper executable
+        run: chmod +x ./mvnw
 
-      - name: ⏱️ Record Build Start Time
-        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+      - name: Build with Maven
+        run: ./mvnw -B clean compile -DskipTests=true --no-transfer-progress
 
-      # OPTIMIZATION 2 & 3: Parallel threads from maven.config + compiler flags from pom.xml
-      - name: ⚡ Run Optimized Build (Parallel Threads + Cache)
-        working-directory: backend-java
-        run: |
-          chmod +x ./mvnw
-          echo "Running with optimizations:"
-          echo "  ✅ Parallel threads: -T 1C (from .mvn/maven.config)"
-          echo "  ✅ Maven .m2 dependency cache restored"
-          echo "  ✅ Compiler fork + JVM TieredStopAtLevel=1 (from pom.xml)"
-          echo "──────────────────────────────────────────────"
-          ./mvnw clean compile -DskipTests=true --no-transfer-progress
-
-      - name: ⏱️ Display Optimized Build Time
-        run: |
-          END_TIME=$(date +%s)
-          ELAPSED=$((END_TIME - START_TIME))
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  ✅ OPTIMIZED BUILD TIME: ${ELAPSED} seconds"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-      # BONUS: Run compile again — nothing changed, should be instant
-      - name: 🏆 Incremental Build Demo (Cache Hit — Should Be Instant)
-        working-directory: backend-java
-        run: |
-          chmod +x ./mvnw
-          START=$(date +%s)
-          ./mvnw compile -DskipTests=true --no-transfer-progress
-          END=$(date +%s)
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  🏆 INCREMENTAL BUILD TIME: $((END - START)) seconds"
-          echo "  Expected: 'Nothing to compile - all classes are up to date'"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-      - name: 📤 Upload Compiled Classes as Artifact
+      - name: Upload compiled classes
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: compiled-classes
-          path: backend-java/target/classes/
-          retention-days: 7
+          name: backend-java-classes
+          path: backend-java/target/classes
+          if-no-files-found: error
