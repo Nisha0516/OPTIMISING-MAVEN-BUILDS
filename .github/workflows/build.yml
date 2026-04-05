@@ -40,11 +40,19 @@ jobs:
           cache: maven
           cache-dependency-path: backend-java/pom.xml
 
+      - name: Cache local Maven build cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-maven-build-cache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-maven-build-cache-
+
       - name: Make Maven wrapper executable
         run: chmod +x ./mvnw
 
       - name: Build with Maven
-        run: ./mvnw -B clean compile -DskipTests=true --no-transfer-progress
+        run: ./mvnw -B compile -DskipTests=true --no-transfer-progress
 
       - name: Upload compiled classes
         if: success()
