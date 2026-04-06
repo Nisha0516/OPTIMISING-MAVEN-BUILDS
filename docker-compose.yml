@@ -11,6 +11,12 @@ services:
       - mongodb_data:/data/db
     networks:
       - carrental-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   # The Java Spring Boot Backend API
   backend:
@@ -18,12 +24,19 @@ services:
       context: ./backend-java
     container_name: carrental-backend
     ports:
-      - "8080:8080"
+      - "5000:5000"
     environment:
-      # Inject the internal Docker networking URL so Spring can find Mongo
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/carrental
+      # Inject multiple naming conventions to ensure Spring Boot picks it up
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/car_rental
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/car_rental
+      - SPRING_DATA_MONGODB_HOST=mongodb
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=car_rental
+      - SERVER_PORT=5000
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - carrental-network
 

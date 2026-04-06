@@ -1,3 +1,4 @@
+// Docker Hub Automated Build Test - Verifying optimized Maven & Docker integration
 package com.carrental;
 
 import org.springframework.boot.SpringApplication;
