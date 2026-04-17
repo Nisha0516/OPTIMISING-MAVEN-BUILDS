@@ -12,9 +12,9 @@ const Report = () => {
   const [dateRange, setDateRange] = useState('monthly');
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [analytics, setAnalytics] = useState({
+  const [startDate] = useState('');
+  const [endDate] = useState('');
+  const [analytics] = useState({
     totalRevenue: 125840,
     totalBookings: 342,
     activeUsers: 1250,

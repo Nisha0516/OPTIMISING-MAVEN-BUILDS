@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ownerAPI } from '../../services/api';
 import Profile from "./Profile";
@@ -44,9 +44,6 @@ function OwnerDashboard() {  // Component name is OwnerDashboard
     completedBookings: 0
   });
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -59,12 +56,7 @@ function OwnerDashboard() {  // Component name is OwnerDashboard
     else setActiveTab('profile');
   }, [location]);
 
-  useEffect(() => {
-    fetchDashboardData();
-    fetchProfileData();
-  }, []);
-
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     try {
       const response = await ownerAPI.getProfile();
       if (response.success && response.user) {
@@ -98,10 +90,9 @@ function OwnerDashboard() {  // Component name is OwnerDashboard
       const localData = getUserData();
       setOwnerProfile(localData);
     }
-  };
+  }, []);
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
+  const fetchDashboardData = useCallback(async () => {
     try {
       const response = await ownerAPI.getDashboard();
       const data = response.stats || {};
@@ -119,7 +110,6 @@ function OwnerDashboard() {  // Component name is OwnerDashboard
         totalEarnings: data.totalEarnings || 0
       }));
     } catch (err) {
-      setError(err.message || 'Failed to load dashboard');
       console.error('Error fetching dashboard:', err);
       // Fallback to mock data
       setStats({
@@ -128,10 +118,13 @@ function OwnerDashboard() {  // Component name is OwnerDashboard
         totalBookings: 0,
         totalEarnings: 0
       });
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardData();
+    fetchProfileData();
+  }, [fetchDashboardData, fetchProfileData]);
 
   // Removed redundant stats-override useEffect
 

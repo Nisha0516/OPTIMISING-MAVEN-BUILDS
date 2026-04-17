@@ -1,5 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  History, 
+  DirectionsCar, 
+  CalendarMonth, 
+  Timer, 
+  CheckCircle, 
+  Cancel, 
+  Download,
+  Payments,
+  AccessTime
+} from '@mui/icons-material';
 import { bookingsAPI } from '../../services/api';
 import CustomerLayout from './CustomerLayout';
 import RazorpayPayment from '../../components/RazorpayPayment';
@@ -15,38 +26,57 @@ const MyBooking = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchBookings();
+  const handleDownloadPdf = useCallback(async (bookingId) => {
+    try {
+      const response = await bookingsAPI.getBooking(bookingId);
+      const booking = response.booking || response;
+      generateBookingPDF(booking, { companyName: 'DriveEasy' });
+    } catch (error) {
+      toast.error('Failed to generate PDF');
+    }
   }, []);
 
-  const fetchBookings = async () => {
+  const checkAutoPdf = useCallback(async (currentBookings) => {
+    const AUTO_PDF_STATUSES = new Set(['confirmed', 'completed']);
+    try {
+      const pdfKey = 'driveeasy_pdf_generated_map';
+      const pdfMap = JSON.parse(localStorage.getItem(pdfKey) || '{}');
+      
+      for (const b of currentBookings) {
+        const status = (b.status || '').toLowerCase();
+        if (AUTO_PDF_STATUSES.has(status) && pdfMap[b.id] !== status) {
+          await handleDownloadPdf(b.id);
+          pdfMap[b.id] = status;
+        }
+      }
+      localStorage.setItem(pdfKey, JSON.stringify(pdfMap));
+    } catch (e) {}
+  }, [handleDownloadPdf]);
+
+  const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
       const response = await bookingsAPI.getBookings();
-      console.log('Fetched bookings:', response);
       
-      // Transform API data to match component format
       const transformedBookings = (response.bookings || []).map(booking => ({
         id: booking._id || booking.id,
-        _id: booking._id || booking.id, // Keep original ID for API calls
-        carName: booking.car?.name || 'Car',
-        image: booking.car?.images?.[0] || '🚗',
-        startDate: booking.startDate ? new Date(booking.startDate).toLocaleDateString() : 'N/A',
-        endDate: booking.endDate ? new Date(booking.endDate).toLocaleDateString() : 'N/A',
+        _id: booking._id || booking.id,
+        carName: booking.car?.name || 'Luxury Vehicle',
+        image: booking.car?.images?.[0] || booking.car?.image || '🚗',
+        startDate: booking.startDate ? new Date(booking.startDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A',
+        endDate: booking.endDate ? new Date(booking.endDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A',
         status: (booking.status || 'pending').toLowerCase(),
         total: booking.totalPrice || 0,
-        ownerName: booking.owner?.name || 'Owner',
+        ownerName: booking.owner?.name || 'DriveEasy Partner',
         paymentMethod: booking.paymentMethod || 'N/A',
         paymentStatus: booking.paymentStatus || 'Pending',
         days: booking.days || Math.ceil((new Date(booking.endDate) - new Date(booking.startDate)) / (1000 * 60 * 60 * 24))
       }));
       
       setBookings(transformedBookings);
-      // Trigger auto-PDF generation if status changed
       await checkAutoPdf(transformedBookings);
     } catch (error) {
       console.error('Error fetching bookings:', error);
-      // Fallback to localStorage or mock data
       const savedBookings = JSON.parse(localStorage.getItem('customerBookings') || '[]');
       if (savedBookings.length > 0) {
         setBookings(savedBookings);
@@ -54,17 +84,19 @@ const MyBooking = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkAutoPdf]);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
   const handleCancelBooking = async (bookingId) => {
     if (window.confirm('Are you sure you want to cancel this booking?')) {
       try {
         await bookingsAPI.cancelBooking(bookingId);
         toast.success('Booking cancelled successfully');
-        // Refresh bookings list
         fetchBookings();
       } catch (error) {
-        console.error('Error cancelling booking:', error);
         toast.error(error.message || 'Failed to cancel booking');
       }
     }
@@ -75,132 +107,27 @@ const MyBooking = () => {
     if (!input) return;
 
     const extraDays = parseInt(input, 10);
-    if (Number.isNaN(extraDays) || extraDays <= 0) {
-      toast.error('Please enter a valid number of days');
-      return;
-    }
-
-    if (extraDays > 7) {
-      toast.error('You can extend a booking by up to 7 days online.');
+    if (Number.isNaN(extraDays) || extraDays <= 0 || extraDays > 7) {
+      toast.error('Please enter a valid number of days (1-7)');
       return;
     }
 
     try {
       const res = await bookingsAPI.extendBooking(bookingId, extraDays);
-      toast.success(res.message || 'Extension request sent to owner. Awaiting approval.');
+      toast.success(res.message || 'Extension request sent to owner.');
       fetchBookings();
     } catch (error) {
-      console.error('Error extending booking:', error);
       toast.error(error.message || 'Failed to request extension');
     }
   };
 
   const handleConfirmBooking = async (bookingId) => {
-    if (window.confirm('Are you sure you want to confirm this booking?')) {
-      try {
-        await bookingsAPI.confirmBooking(bookingId);
-        toast.success('Booking confirmed successfully');
-        // Refresh bookings list
-        fetchBookings();
-      } catch (error) {
-        console.error('Error confirming booking:', error);
-        toast.error(error.message || 'Failed to confirm booking');
-      }
-    }
-  };
-
-  const handleAcceptBooking = async (bookingId) => {
-    if (window.confirm('Are you sure you want to accept this booking?')) {
-      try {
-        await bookingsAPI.acceptBooking(bookingId);
-        toast.success('Booking accepted successfully');
-        // Refresh bookings list
-        fetchBookings();
-      } catch (error) {
-        console.error('Error accepting booking:', error);
-        toast.error(error.message || 'Failed to accept booking');
-      }
-    }
-  };
-
-  const handleDeleteBooking = async (bookingId) => {
-    if (window.confirm('Are you sure you want to delete this booking? This action cannot be undone.')) {
-      try {
-        await bookingsAPI.deleteBooking(bookingId);
-        toast.success('Booking deleted successfully');
-        // Refresh bookings list
-        fetchBookings();
-      } catch (error) {
-        console.error('Error deleting booking:', error);
-        toast.error(error.message || 'Failed to delete booking');
-      }
-    }
-  };
-
-  const handlePayNow = (booking) => {
-    setSelectedBooking(booking);
-    setShowPaymentModal(true);
-  };
-
-  const handlePaymentSuccess = (payment) => {
-    toast.success('Payment successful! Your booking is now confirmed.');
-    setShowPaymentModal(false);
-    setSelectedBooking(null);
-    fetchBookings(); // Refresh bookings to show updated payment status
-  };
-
-  const handlePaymentFailure = (error) => {
-    console.error('Payment failed:', error);
-    // Modal will be closed by Razorpay component
-  };
-
-  const handleClosePayment = () => {
-    setShowPaymentModal(false);
-    setSelectedBooking(null);
-  };
-
-  // Generate professional PDF for a specific booking by fetching full details
-  const handleDownloadPdf = async (bookingId) => {
     try {
-      const response = await bookingsAPI.getBooking(bookingId);
-      const booking = response.booking || response;
-      if (!booking) {
-        alert('Unable to load booking details for PDF');
-        return;
-      }
-      generateBookingPDF(booking, { companyName: 'Car Rental' });
+      await bookingsAPI.confirmBooking(bookingId);
+      toast.success('Booking confirmed!');
+      fetchBookings();
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert(error.message || 'Failed to generate PDF');
-    }
-  };
-
-  // Auto-generate PDF after status changes to confirmed/cancelled/rejected/completed
-  const checkAutoPdf = async (currentBookings) => {
-    const AUTO_PDF_STATUSES = new Set(['confirmed', 'cancelled', 'rejected', 'completed']);
-    try {
-      const statusKey = 'customer_booking_status_map';
-      const pdfKey = 'customer_booking_pdf_generated_map';
-      const prevMap = JSON.parse(localStorage.getItem(statusKey) || '{}');
-      const pdfMap = JSON.parse(localStorage.getItem(pdfKey) || '{}');
-      const newMap = { ...prevMap };
-
-      for (const b of currentBookings) {
-        const prevStatus = (prevMap[b.id] || '').toLowerCase();
-        const status = (b.status || '').toLowerCase();
-        if (status && status !== prevStatus) {
-          newMap[b.id] = status;
-          if (AUTO_PDF_STATUSES.has(status) && pdfMap[b.id] !== status) {
-            await handleDownloadPdf(b.id);
-            pdfMap[b.id] = status;
-          }
-        }
-      }
-
-      localStorage.setItem(statusKey, JSON.stringify(newMap));
-      localStorage.setItem(pdfKey, JSON.stringify(pdfMap));
-    } catch (e) {
-      console.error('Auto PDF check failed:', e);
+      toast.error(error.message || 'Failed to confirm booking');
     }
   };
 
@@ -208,272 +135,143 @@ const MyBooking = () => {
     ? bookings 
     : bookings.filter(b => b.status === filter);
 
-  const getStatusBadgeClass = (status) => {
-    switch(status) {
-      case 'pending': return 'status-pending';
-      case 'confirmed': return 'status-confirmed';
-      case 'completed': return 'status-completed';
-      case 'cancelled': return 'status-cancelled';
-      case 'rejected': return 'status-cancelled';
-      default: return '';
-    }
-  };
-
   return (
     <CustomerLayout>
-      <div className="my-bookings-page">
-        <div className="bookings-header">
-          <h1>My Bookings</h1>
-          <p>Manage and track your car rental bookings</p>
-        </div>
+      <div className="luxury-bookings-page">
+        <header className="bookings-v3-header">
+          <div className="header-icon-box">
+            <History sx={{ fontSize: 40, color: '#3b82f6' }} />
+          </div>
+          <div className="header-text-box">
+            <h1>Activity & Bookings</h1>
+            <p>Manage your premium rentals and journey history</p>
+          </div>
+        </header>
 
-        <div className="bookings-stats">
-          <div className="stat-card">
-            <span className="stat-number">{bookings.length}</span>
-            <span className="stat-label">Total Bookings</span>
+        <section className="bookings-v3-stats">
+          <div className="stat-pill-luxury">
+            <span className="val">{bookings.length}</span>
+            <span className="lab">Total</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-number">{bookings.filter(b => b.status === 'pending').length}</span>
-            <span className="stat-label">Pending</span>
+          <div className="stat-pill-luxury accent">
+            <span className="val">{bookings.filter(b => b.status === 'confirmed').length}</span>
+            <span className="lab">Active</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-number">{bookings.filter(b => b.status === 'confirmed').length}</span>
-            <span className="stat-label">Confirmed</span>
+          <div className="stat-pill-luxury">
+            <span className="val">{bookings.filter(b => b.status === 'pending').length}</span>
+            <span className="lab">Pending</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-number">{bookings.filter(b => b.status === 'completed').length}</span>
-            <span className="stat-label">Completed</span>
-          </div>
-        </div>
+        </section>
 
-        <div className="booking-filters">
-          <button 
-            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            All ({bookings.length})
-          </button>
-          <button 
-            className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
-            onClick={() => setFilter('pending')}
-          >
-            Pending ({bookings.filter(b => b.status === 'pending').length})
-          </button>
-          <button 
-            className={`filter-btn ${filter === 'confirmed' ? 'active' : ''}`}
-            onClick={() => setFilter('confirmed')}
-          >
-            Confirmed ({bookings.filter(b => b.status === 'confirmed').length})
-          </button>
-          <button 
-            className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
-            onClick={() => setFilter('completed')}
-          >
-            Completed ({bookings.filter(b => b.status === 'completed').length})
-          </button>
-        </div>
+        <nav className="bookings-v3-filters">
+          {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(f => (
+            <button 
+              key={f}
+              className={`filter-chip-v3 ${filter === f ? 'active' : ''}`}
+              onClick={() => setFilter(f)}
+            >
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </nav>
 
-        <div className="bookings-list">
+        <div className="bookings-v3-list">
           {loading ? (
-            <div className="empty-bookings">
-              <div className="empty-icon">⏳</div>
-              <h3>Loading your bookings...</h3>
-              <p>Please wait while we fetch your booking history</p>
+            <div className="loading-v3-state">
+              <div className="spinner-v3"></div>
+              <p>Retrieving your experiences...</p>
             </div>
           ) : filteredBookings.length === 0 ? (
-            <div className="empty-bookings">
-              <div className="empty-icon">📋</div>
-              <h3>No {filter !== 'all' ? filter : ''} bookings found</h3>
-              <p>Start exploring our amazing car collection!</p>
+            <div className="empty-v3-state">
+              <DirectionsCar sx={{ fontSize: 80, opacity: 0.2 }} />
+              <h3>No bookings found</h3>
+              <p>Your premium car awaits. Start your first journey today.</p>
               <button 
-                className="btn-primary"
+                className="btn-discover-luxury"
                 onClick={() => navigate('/customer/home')}
               >
-                Browse Cars
+                Discover the Fleet
               </button>
             </div>
           ) : (
             filteredBookings.map(booking => (
-              <div key={booking.id} className="booking-card">
-                <div className="booking-header">
-                  <div className="booking-car">
-                    <div className="car-image-small">
-                      {booking.image && booking.image !== '🚗' ? (
-                        <img src={booking.image} alt={booking.carName} className="car-image-photo" />
-                      ) : (
-                        '🚗'
-                      )}
+              <div key={booking.id} className="booking-v3-card">
+                <div className="card-v3-main">
+                  <div className="car-v3-visual">
+                    {booking.image.length <= 2 ? (
+                      <div className="car-v3-emoji">{booking.image}</div>
+                    ) : (
+                      <img src={booking.image} alt={booking.carName} />
+                    )}
+                    <div className={`status-v3-badge ${booking.status}`}>
+                      {booking.status}
                     </div>
-                    <div className="car-info-text">
+                  </div>
+
+                  <div className="card-v3-info">
+                    <div className="info-v3-top">
                       <h3>{booking.carName}</h3>
-                      <p className="booking-id">Booking ID: #{booking.id}</p>
-                      <p className="owner-name">Owner: {typeof booking.ownerName === 'string' ? booking.ownerName : 'Owner'}</p>
+                      <span className="booking-v3-id">ID: #{booking.id.slice(-6).toUpperCase()}</span>
                     </div>
-                  </div>
-                  <div className="booking-status-section">
-                    <span className={`status-badge ${getStatusBadgeClass(booking.status)}`}>
-                      {booking.status.toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="booking-details">
-                  <div className="detail-row">
-                    <div className="detail-column">
-                      <span className="detail-label">📅 Start Date</span>
-                      <span className="detail-value">{booking.startDate}</span>
-                    </div>
-                    <div className="detail-column">
-                      <span className="detail-label">📅 End Date</span>
-                      <span className="detail-value">{booking.endDate}</span>
-                    </div>
-                    <div className="detail-column">
-                      <span className="detail-label">⏱️ Duration</span>
-                      <span className="detail-value">{booking.days} days</span>
-                    </div>
-                  </div>
-                  <div className="detail-row">
-                    <div className="detail-column">
-                      <span className="detail-label">💳 Payment Method</span>
-                      <span className="detail-value">{booking.paymentMethod?.toUpperCase()}</span>
-                    </div>
-                    <div className="detail-column">
-                      <span className="detail-label">💰 Total Amount</span>
-                      <span className="detail-value booking-total">${booking.total}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="booking-actions">
-                  {booking.status === 'pending' && (
-                    <>
-                      <div className="pending-message">
-                        ⏳ Waiting for your confirmation
-                      </div>
-                      <button 
-                        className="btn-confirm"
-                        onClick={() => handleConfirmBooking(booking.id)}
-                      >
-                        ✓ Confirm Booking
-                      </button>
-                      <button 
-                        className="btn-cancel"
-                        onClick={() => handleCancelBooking(booking.id)}
-                      >
-                        ✕ Cancel Booking
-                      </button>
-                    </>
-                  )}
-                  {booking.status === 'confirmed' && (
-                    <>
-                      <div className="confirmed-message">
-                        ✅ Booking confirmed! You can pick up the car on {booking.startDate}
-                      </div>
-                      {booking.paymentStatus !== 'Completed' && (
-                        <button
-                          className="btn-pay-razorpay"
-                          onClick={() => handlePayNow(booking)}
-                        >
-                          💳 Pay Now (₹{booking.total})
-                        </button>
-                      )}
-                      {booking.paymentStatus === 'Completed' && (
-                        <div className="payment-completed-badge">
-                          ✅ Payment Completed
+                    
+                    <div className="info-v3-grid">
+                      <div className="info-v3-item">
+                        <CalendarMonth />
+                        <div className="meta">
+                          <label>Timeline</label>
+                          <span>{booking.startDate} - {booking.endDate}</span>
                         </div>
-                      )}
-                      <button 
-                        className="btn-confirm"
-                        onClick={() => handleExtendBooking(booking.id)}
-                      >
-                        ⏰ Extend Booking
-                      </button>
-                      <button 
-                        className="btn-accept"
-                        onClick={() => handleAcceptBooking(booking.id)}
-                      >
-                        ✓ Accept
-                      </button>
-                      <button 
-                        className="btn-delete"
-                        onClick={() => handleDeleteBooking(booking.id)}
-                      >
-                        🗑 Delete
-                      </button>
-                      <button 
-                        className="btn-primary"
-                        onClick={() => handleDownloadPdf(booking.id)}
-                      >
-                        Download PDF
-                      </button>
-                    </>
-                  )}
-                  {booking.status === 'completed' && (
-                    <>
-                      <button 
-                        className="btn-delete"
-                        onClick={() => handleDeleteBooking(booking.id)}
-                      >
-                        🗑 Delete
-                      </button>
-                      <button 
-                        className="btn-primary"
-                        onClick={() => handleDownloadPdf(booking.id)}
-                      >
-                        Download PDF
-                      </button>
-                    </>
-                  )}
-                  {booking.status === 'cancelled' && (
-                    <>
-                      <div className="cancelled-message">
-                        ❌ This booking was cancelled
                       </div>
-                      <button 
-                        className="btn-accept"
-                        onClick={() => handleAcceptBooking(booking.id)}
-                      >
-                        ✓ Accept
-                      </button>
-                      <button 
-                        className="btn-delete"
-                        onClick={() => handleDeleteBooking(booking.id)}
-                      >
-                        🗑 Delete
-                      </button>
-                      <button 
-                        className="btn-primary"
-                        onClick={() => handleDownloadPdf(booking.id)}
-                      >
-                        Download PDF
-                      </button>
-                    </>
-                  )}
-                  {booking.status === 'rejected' && (
-                    <>
-                      <div className="cancelled-message">
-                        ❌ This booking was rejected by the owner
+                      <div className="info-v3-item">
+                        <Timer />
+                        <div className="meta">
+                          <label>Duration</label>
+                          <span>{booking.days} Days</span>
+                        </div>
                       </div>
-                      <button 
-                        className="btn-accept"
-                        onClick={() => handleAcceptBooking(booking.id)}
-                      >
-                        ✓ Accept
+                      <div className="info-v3-item">
+                        <Payments />
+                        <div className="meta">
+                          <label>Investment</label>
+                          <span className="price-v3-accent">₹{booking.total}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card-v3-actions">
+                  <div className="status-message-v3">
+                    {booking.status === 'pending' && <><AccessTime /> Awaiting Confirmation</>}
+                    {booking.status === 'confirmed' && <><CheckCircle /> Journey Secured</>}
+                    {booking.status === 'completed' && <><CheckCircle /> Rental Completed</>}
+                    {booking.status === 'cancelled' && <><Cancel /> Booking Revoked</>}
+                  </div>
+
+                  <div className="action-v3-group">
+                    {booking.status === 'pending' && (
+                      <>
+                        <button className="btn-v3 secondary" onClick={() => handleCancelBooking(booking.id)}>Cancel</button>
+                        <button className="btn-v3 primary" onClick={() => handleConfirmBooking(booking.id)}>Confirm</button>
+                      </>
+                    )}
+                    {booking.status === 'confirmed' && (
+                      <>
+                        {booking.paymentStatus !== 'Completed' && (
+                          <button className="btn-v3 success" onClick={() => { setSelectedBooking(booking); setShowPaymentModal(true); }}>
+                            Pay Now
+                          </button>
+                        )}
+                        <button className="btn-v3 secondary" onClick={() => handleExtendBooking(booking.id)}>Extend</button>
+                        <button className="btn-v3 outline" onClick={() => handleDownloadPdf(booking.id)}><Download /></button>
+                      </>
+                    )}
+                    {['completed', 'cancelled', 'rejected'].includes(booking.status) && (
+                      <button className="btn-v3 outline" onClick={() => handleDownloadPdf(booking.id)}>
+                        <Download sx={{ mr: 1 }} /> Receipt
                       </button>
-                      <button 
-                        className="btn-delete"
-                        onClick={() => handleDeleteBooking(booking.id)}
-                      >
-                        🗑 Delete
-                      </button>
-                      <button 
-                        className="btn-primary"
-                        onClick={() => handleDownloadPdf(booking.id)}
-                      >
-                        Download PDF
-                      </button>
-                    </>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             ))
@@ -481,17 +279,16 @@ const MyBooking = () => {
         </div>
       </div>
 
-      {/* Razorpay Payment Modal */}
       {showPaymentModal && selectedBooking && (
-        <div className="payment-modal-overlay" onClick={handleClosePayment}>
-          <div className="payment-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="payment-modal-close" onClick={handleClosePayment}>×</button>
+        <div className="payment-v3-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="payment-v3-box" onClick={e => e.stopPropagation()}>
+            <button className="close-v3" onClick={() => setShowPaymentModal(false)}>×</button>
             <RazorpayPayment
-              bookingId={selectedBooking._id || selectedBooking.id}
+              bookingId={selectedBooking._id}
               amount={selectedBooking.total}
-              onSuccess={handlePaymentSuccess}
-              onFailure={handlePaymentFailure}
-              onClose={handleClosePayment}
+              onSuccess={() => { toast.success('Payment Secured!'); setShowPaymentModal(false); fetchBookings(); }}
+              onFailure={() => toast.error('Payment Failed')}
+              onClose={() => setShowPaymentModal(false)}
             />
           </div>
         </div>

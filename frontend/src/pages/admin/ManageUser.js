@@ -5,7 +5,6 @@ import './AdminStyles.css';
 const ManageUser = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
 
@@ -14,7 +13,6 @@ const ManageUser = () => {
   }, []);
 
   const fetchUsers = async () => {
-    setLoading(true);
     try {
       const response = await adminAPI.getAllUsers();
       setUsers(response.users || []);
@@ -42,8 +40,6 @@ const ManageUser = () => {
         }
       ];
       setUsers(mockUsers);
-    } finally {
-      setLoading(false);
     }
   };
 

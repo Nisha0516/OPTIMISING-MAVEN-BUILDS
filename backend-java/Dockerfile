@@ -1,18 +1,20 @@
+# syntax=docker/dockerfile:1.7
+
 # Stage 1: Build the Java application using Maven
 FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
 WORKDIR /app
 
-# Strategically copy pom.xml and dependencies first to leverage Docker caching
+# Copy build metadata first so dependency downloads are cached across source-only changes.
 COPY pom.xml .
 COPY .mvn ./.mvn
 COPY mvnw .
-# We use dependecy:go-offline to cache downloading the internet
-RUN ./mvnw dependency:go-offline -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw -B dependency:go-offline -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
 # Copy the actual source code and build it
 COPY src ./src
-# Build the application, skipping tests during image build phase
-RUN ./mvnw clean package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw -B clean package -DskipTests
 
 # Stage 2: Create a minimal lightweight JRE runtime container
 FROM eclipse-temurin:17-jre-alpine

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const ManageOwners = () => {
   const [owners, setOwners] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Mock data - replace with actual API calls

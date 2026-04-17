@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { notificationsAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -15,14 +15,7 @@ const AdminNotifications = ({ limit = 5, showAll = false }) => {
   const audioContextRef = useRef(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchNotifications();
-    // Refresh notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const playAlertSound = () => {
+  const playAlertSound = useCallback(() => {
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return;
@@ -54,9 +47,9 @@ const AdminNotifications = ({ limit = 5, showAll = false }) => {
     } catch (soundError) {
       console.warn('Notification sound could not play:', soundError);
     }
-  };
+  }, []);
 
-  const showNotificationToast = (notification) => {
+  const showNotificationToast = useCallback((notification) => {
     const baseOptions = {
       pauseOnFocusLoss: false,
       closeOnClick: true,
@@ -83,9 +76,9 @@ const AdminNotifications = ({ limit = 5, showAll = false }) => {
         }
       );
     }
-  };
+  }, [playAlertSound]);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       const response = await notificationsAPI.getNotifications(null, showAll ? 50 : limit);
       const fetchedNotifications = response.notifications || [];
@@ -114,7 +107,13 @@ const AdminNotifications = ({ limit = 5, showAll = false }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit, showAll, showNotificationToast]);
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   const handleMarkAsRead = async (notificationId) => {
     try {
@@ -266,4 +265,3 @@ const AdminNotifications = ({ limit = 5, showAll = false }) => {
 };
 
 export default AdminNotifications;
-
