@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { 
-  Person, 
-  Email, 
-  Phone, 
-  Badge, 
-  Lock, 
-  ArrowBack,
-  DirectionsCar
-} from '@mui/icons-material';
 import { authAPI } from '../../services/api';
 import './Signup.css';
 
@@ -57,6 +48,8 @@ const CustomerSignup = () => {
         drivingLicense: formData.drivingLicense,
         role: 'customer'
       });
+
+      alert('Signup successful! Please login with your credentials.');
       navigate('/customer/login');
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
@@ -66,142 +59,118 @@ const CustomerSignup = () => {
   };
 
   return (
-    <div className="luxury-signup-container">
-      <Link to="/" className="back-link">
-        <ArrowBack /> <span>Home</span>
-      </Link>
-      
-      <div className="signup-visual-bg">
-        <div className="bg-overlay"></div>
-      </div>
-
-      <div className="signup-card-luxury">
-        <div className="signup-brand">
-          <DirectionsCar sx={{ fontSize: 32, color: '#3b82f6' }} />
-          <h2>DriveEasy</h2>
-        </div>
-
-        <div className="signup-header-v2">
-          <h1>Join DriveEasy</h1>
-          <p>Experience the ultimate in car rentals</p>
+    <div className="signup-container">
+      <div className="signup-card">
+        <div className="signup-header">
+          <h1>Create Account</h1>
+          <p>Join thousands of happy customers</p>
         </div>
 
         {error && (
-          <div className="error-badge-luxury">
+          <div className="error-message" style={{
+            padding: '12px',
+            background: '#fee2e2',
+            color: '#dc2626',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            textAlign: 'center'
+          }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="luxury-signup-form">
-          <div className="signup-form-grid">
-            <div className="input-field-luxury">
-              <label htmlFor="name">Full Name</label>
-              <div className="input-wrapper-v2">
-                <Person className="input-icon-v2" />
-                <input 
-                  type="text" 
-                  id="name"
-                  name="name"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
+        <form onSubmit={handleSubmit} className="signup-form">
+          <div className="form-group">
+            <label htmlFor="name">Full Name</label>
+            <input 
+              type="text" 
+              id="name"
+              name="name"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="input-field-luxury">
-              <label htmlFor="email">Email</label>
-              <div className="input-wrapper-v2">
-                <Email className="input-icon-v2" />
-                <input 
-                  type="email" 
-                  id="email"
-                  name="email"
-                  placeholder="email@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input 
+              type="email" 
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="input-field-luxury">
-              <label htmlFor="phone">Phone</label>
-              <div className="input-wrapper-v2">
-                <Phone className="input-icon-v2" />
-                <input 
-                  type="tel" 
-                  id="phone"
-                  name="phone"
-                  placeholder="+91 XXXXX XXXXX"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
+          <div className="form-group">
+            <label htmlFor="phone">Phone Number</label>
+            <input 
+              type="tel" 
+              id="phone"
+              name="phone"
+              placeholder="Enter your phone number"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="input-field-luxury">
-              <label htmlFor="drivingLicense">License Number</label>
-              <div className="input-wrapper-v2">
-                <Badge className="input-icon-v2" />
-                <input 
-                  type="text" 
-                  id="drivingLicense"
-                  name="drivingLicense"
-                  placeholder="DL-XXXXXX"
-                  value={formData.drivingLicense}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
+          <div className="form-group">
+            <label htmlFor="drivingLicense">Driving License</label>
+            <input 
+              type="text" 
+              id="drivingLicense"
+              name="drivingLicense"
+              placeholder="Enter your driving license number"
+              value={formData.drivingLicense}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="input-field-luxury">
+          <div className="form-row">
+            <div className="form-group">
               <label htmlFor="password">Password</label>
-              <div className="input-wrapper-v2">
-                <Lock className="input-icon-v2" />
-                <input 
-                  type="password" 
-                  id="password"
-                  name="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+              <input 
+                type="password" 
+                id="password"
+                name="password"
+                placeholder="Create a password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
             </div>
 
-            <div className="input-field-luxury">
-              <label htmlFor="confirmPassword">Confirm</label>
-              <div className="input-wrapper-v2">
-                <Lock className="input-icon-v2" />
-                <input 
-                  type="password" 
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input 
+                type="password" 
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
           <button 
             type="submit" 
-            className="signup-btn-luxury"
+            className="signup-btn"
             disabled={loading}
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
-        <div className="signup-footer-v2">
-          <p>Already a member? <Link to="/customer/login">Sign In</Link></p>
+        <div className="signup-footer">
+          <p>Already have an account? <Link to="/customer/login">Sign in here</Link></p>
         </div>
       </div>
     </div>

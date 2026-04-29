@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { emergencyAPI } from '../../services/api';
 import './AdminStyles.css';
 
@@ -18,7 +18,11 @@ const Emergencies = () => {
     { value: 'cancelled', label: 'Cancelled' },
   ];
 
-  const fetchEmergencies = useCallback(async () => {
+  useEffect(() => {
+    fetchEmergencies();
+  }, [filterStatus]);
+
+  const fetchEmergencies = async () => {
     setLoading(true);
     setError('');
     try {
@@ -36,11 +40,7 @@ const Emergencies = () => {
     } finally {
       setLoading(false);
     }
-  }, [filterStatus]);
-
-  useEffect(() => {
-    fetchEmergencies();
-  }, [fetchEmergencies]);
+  };
 
   const handleStatusUpdate = async (emergencyId, newStatus) => {
     try {
@@ -437,3 +437,4 @@ const Emergencies = () => {
 };
 
 export default Emergencies;
+

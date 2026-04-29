@@ -40,7 +40,7 @@ function Profile({ ownerProfile, setOwnerProfile }) {
       };
       
       // Save to backend
-      await ownerAPI.updateProfile(profileDataToSave);
+      const response = await ownerAPI.updateProfile(profileDataToSave);
       
       // Update local state
       setOwnerProfile(profileFormData);

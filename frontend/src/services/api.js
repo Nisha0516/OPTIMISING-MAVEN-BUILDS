@@ -1,5 +1,12 @@
 // API Service for Backend Communication
-const API_BASE_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+// Ensure the URL doesn't end with a slash
+const cleanBaseUrl = API_BASE_URL.endsWith('/') 
+  ? API_BASE_URL.slice(0, -1) 
+  : API_BASE_URL;
+
+const API_URL = `${cleanBaseUrl}`;
 
 // Helper function to get token from localStorage
 const getToken = () => {
@@ -1083,7 +1090,7 @@ export const paymentsAPI = {
 };
 
 // Export all APIs
-const apiServices = {
+export default {
   auth: authAPI,
   cars: carsAPI,
   bookings: bookingsAPI,
@@ -1098,4 +1105,3 @@ const apiServices = {
   emergency: emergencyAPI,
 };
 
-export default apiServices;

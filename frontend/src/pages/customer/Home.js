@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import CustomerLayout from './CustomerLayout';
-import { DirectionsCar, Security, MonetizationOn, Speed } from '@mui/icons-material';
 import CarCard from './components/CarCard/CarCard';
 import SearchFilter from './components/SearchFilter/SearchFilter';
 import { carsAPI } from '../../services/api';
-import heroBg from '../hero-bg.png';
 import './Home.css';
 
 const CustomerHome = () => {
@@ -88,7 +86,7 @@ const CustomerHome = () => {
       <div className="customer-home">
         {/* Hero Section */}
         <section className="hero-section">
-          <div className="hero-background" style={{ backgroundImage: `url(${heroBg})` }}>
+          <div className="hero-background">
             <div className="hero-overlay"></div>
           </div>
           <div className="hero-content">
@@ -153,7 +151,7 @@ const CustomerHome = () => {
                   </div>
                 ) : (
                   <div className="empty-state">
-                    <div className="empty-icon"><DirectionsCar sx={{ fontSize: 80, opacity: 0.3 }} /></div>
+                    <div className="empty-icon">🚗</div>
                     <h3>No cars found</h3>
                     <p>Try adjusting your search criteria to find more options.</p>
                     <button 
@@ -179,27 +177,27 @@ const CustomerHome = () => {
         <section className="features-section">
           <div className="container">
             <div className="section-header">
-              <h2>Why Choose DriveEasy?</h2>
+              <h2>Why Choose DriveFlex?</h2>
               <p>Experience the difference with our premium rental service</p>
             </div>
             <div className="features-grid">
               <div className="feature-card">
-                <div className="feature-icon"><Security sx={{ fontSize: 40, color: '#3b82f6' }} /></div>
+                <div className="feature-icon">🔒</div>
                 <h3>Secure Booking</h3>
                 <p>Your information is protected with bank-level security encryption.</p>
               </div>
               <div className="feature-card">
-                <div className="feature-icon"><MonetizationOn sx={{ fontSize: 40, color: '#3b82f6' }} /></div>
+                <div className="feature-icon">💰</div>
                 <h3>Best Prices</h3>
                 <p>Guaranteed competitive pricing with no hidden fees or charges.</p>
               </div>
               <div className="feature-card">
-                <div className="feature-icon"><Security sx={{ fontSize: 40, color: '#3b82f6' }} /></div>
+                <div className="feature-icon">🛡️</div>
                 <h3>Full Insurance</h3>
                 <p>Comprehensive insurance coverage included with every rental.</p>
               </div>
               <div className="feature-card">
-                <div className="feature-icon"><Speed sx={{ fontSize: 40, color: '#3b82f6' }} /></div>
+                <div className="feature-icon">🚀</div>
                 <h3>Instant Confirmation</h3>
                 <p>Get immediate booking confirmation with real-time availability.</p>
               </div>

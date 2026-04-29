@@ -32,6 +32,8 @@ const EmergencyModal = ({
     onSubmit(selectedType, description);
   };
 
+  const selectedEmergency = emergencyTypes.find(t => t.id === selectedType);
+
   return (
     <div className="emergency-modal-overlay" onClick={onClose}>
       <div className="emergency-modal" onClick={(e) => e.stopPropagation()}>

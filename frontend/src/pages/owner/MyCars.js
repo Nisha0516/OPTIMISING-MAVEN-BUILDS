@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ownerAPI } from '../../services/api';
+import { toast } from 'react-toastify';
 import "./MyCars.css";
 
 function MyCars() {
   const navigate = useNavigate();
   const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchMyCars();
   }, []);
 
   const fetchMyCars = async () => {
+    setLoading(true);
     try {
       const response = await ownerAPI.getMyCars();
       console.log('Fetched owner cars:', response);
@@ -19,6 +22,8 @@ function MyCars() {
     } catch (error) {
       console.error('Error fetching cars:', error);
       alert('Failed to fetch cars: ' + (error.message || 'Unknown error'));
+    } finally {
+      setLoading(false);
     }
   };
 

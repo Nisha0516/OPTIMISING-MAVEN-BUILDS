@@ -1,12 +1,4 @@
 import React from 'react';
-import { 
-  Search as SearchIcon, 
-  Close,
-  DirectionsCar,
-  Settings,
-  LocalGasStation,
-  AttachMoney
-} from '@mui/icons-material';
 import './SearchFilter.css';
 
 const SearchFilter = ({ filters, onFilterChange, carCount }) => {
@@ -37,126 +29,128 @@ const SearchFilter = ({ filters, onFilterChange, carCount }) => {
   const hasActiveFilters = Object.values(filters).some(value => value !== '');
 
   return (
-    <div className="luxury-search-filter">
-      <div className="search-top-bar">
-        <div className="search-input-wrapper">
-          <SearchIcon className="search-input-icon" />
+    <div className="search-filter">
+      <div className="search-header">
+        <h2>Find Your Perfect Car</h2>
+        <div className="results-count">
+          <span className="count">{carCount}</span> cars available
+        </div>
+      </div>
+
+      <div className="search-controls">
+        {/* Search Input */}
+        <div className="search-input-group">
+          <div className="search-icon">🔍</div>
           <input
             type="text"
-            placeholder="Search for your dream car..."
+            placeholder="Search by car name or location..."
             value={filters.search}
             onChange={handleSearchChange}
-            className="luxury-search-input"
+            className="search-input"
           />
         </div>
-        <div className="results-badge">
-          <span className="results-number">{carCount}</span>
-          <span className="results-label">Vehicles Found</span>
-        </div>
-      </div>
 
-      <div className="filter-controls-grid">
-        <div className="filter-item">
-          <label className="luxury-filter-label">
-            <DirectionsCar sx={{ fontSize: 16 }} />
-            <span>Vehicle Type</span>
-          </label>
-          <select 
-            value={filters.type}
-            onChange={(e) => handleFilterChange('type', e.target.value)}
-            className="luxury-filter-select"
-          >
-            <option value="">All Categories</option>
-            <option value="Sedan">Sedan</option>
-            <option value="SUV">SUV</option>
-            <option value="Sports">Sports</option>
-            <option value="Luxury">Luxury</option>
-            <option value="Electric">Electric</option>
-          </select>
-        </div>
-
-        <div className="filter-item">
-          <label className="luxury-filter-label">
-            <Settings sx={{ fontSize: 16 }} />
-            <span>Transmission</span>
-          </label>
-          <select 
-            value={filters.transmission}
-            onChange={(e) => handleFilterChange('transmission', e.target.value)}
-            className="luxury-filter-select"
-          >
-            <option value="">Any Drive</option>
-            <option value="Automatic">Automatic</option>
-            <option value="Manual">Manual</option>
-          </select>
-        </div>
-
-        <div className="filter-item">
-          <label className="luxury-filter-label">
-            <LocalGasStation sx={{ fontSize: 16 }} />
-            <span>Fuel Type</span>
-          </label>
-          <select 
-            value={filters.fuelType}
-            onChange={(e) => handleFilterChange('fuelType', e.target.value)}
-            className="luxury-filter-select"
-          >
-            <option value="">Any Fuel</option>
-            <option value="Petrol">Petrol</option>
-            <option value="Diesel">Diesel</option>
-            <option value="Electric">Electric</option>
-            <option value="Hybrid">Hybrid</option>
-          </select>
-        </div>
-
-        <div className="filter-item">
-          <label className="luxury-filter-label">
-            <AttachMoney sx={{ fontSize: 16 }} />
-            <span>Budget per Day</span>
-          </label>
-          <select 
-            value={filters.priceRange}
-            onChange={(e) => handleFilterChange('priceRange', e.target.value)}
-            className="luxury-filter-select"
-          >
-            <option value="">Any Budget</option>
-            <option value="0-1000">₹0 - ₹1000</option>
-            <option value="1001-3000">₹1001 - ₹3000</option>
-            <option value="3001-5000">₹3001 - ₹5000</option>
-            <option value="5001-10000">₹5001 - ₹10000</option>
-            <option value="10001-99999">₹10001+</option>
-          </select>
-        </div>
-      </div>
-
-      {hasActiveFilters && (
-        <div className="active-filters-row">
-          <div className="active-filters-list">
-            {Object.entries(filters).map(([key, value]) => {
-              if (!value || key === 'search') return null;
-              
-              let displayValue = value;
-              if (key === 'priceRange') {
-                const [min, max] = value.split('-');
-                displayValue = `₹${min} - ₹${max}`;
-              }
-
-              return (
-                <div key={key} className="luxury-pill">
-                  <span>{displayValue}</span>
-                  <button 
-                    onClick={() => handleFilterChange(key, '')}
-                    className="pill-remove-btn"
-                  >
-                    <Close sx={{ fontSize: 14 }} />
-                  </button>
-                </div>
-              );
-            })}
+        {/* Filter Row */}
+        <div className="filter-row">
+          <div className="filter-group">
+            <label className="filter-label">Car Type</label>
+            <select 
+              value={filters.type}
+              onChange={(e) => handleFilterChange('type', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">All Types</option>
+              <option value="Sedan">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="Sports">Sports</option>
+              <option value="Luxury">Luxury</option>
+              <option value="Electric">Electric</option>
+            </select>
           </div>
-          <button onClick={clearFilters} className="clear-all-btn">
-            Reset All
-          </button>
+
+          <div className="filter-group">
+            <label className="filter-label">Transmission</label>
+            <select 
+              value={filters.transmission}
+              onChange={(e) => handleFilterChange('transmission', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Any Transmission</option>
+              <option value="Automatic">Automatic</option>
+              <option value="Manual">Manual</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label className="filter-label">Fuel Type</label>
+            <select 
+              value={filters.fuelType}
+              onChange={(e) => handleFilterChange('fuelType', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Any Fuel Type</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label className="filter-label">Price Range</label>
+            <select 
+              value={filters.priceRange}
+              onChange={(e) => handleFilterChange('priceRange', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Any Price</option>
+              <option value="0-30">$0 - $30</option>
+              <option value="31-50">$31 - $50</option>
+              <option value="51-80">$51 - $80</option>
+              <option value="81-100">$81 - $100</option>
+              <option value="100-999">$100+</option>
+            </select>
+          </div>
+
+          {hasActiveFilters && (
+            <div className="filter-group">
+              <label className="filter-label">&nbsp;</label>
+              <button 
+                onClick={clearFilters}
+                className="btn btn-ghost"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Active Filters */}
+      {hasActiveFilters && (
+        <div className="active-filters">
+          <span className="active-filters-label">Active filters:</span>
+          {Object.entries(filters).map(([key, value]) => {
+            if (!value) return null;
+            
+            let displayValue = value;
+            if (key === 'priceRange') {
+              const [min, max] = value.split('-');
+              displayValue = `$${min} - $${max}`;
+            }
+
+            return (
+              <span key={key} className="active-filter">
+                {displayValue}
+                <button 
+                  onClick={() => handleFilterChange(key, '')}
+                  className="remove-filter"
+                >
+                  ×
+                </button>
+              </span>
+            );
+          })}
         </div>
       )}
     </div>

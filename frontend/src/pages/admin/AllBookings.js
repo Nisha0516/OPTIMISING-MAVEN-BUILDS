@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { adminAPI, bookingsAPI } from '../../services/api';
 import './AdminStyles.css';
 
@@ -8,11 +8,20 @@ const AllBookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const fetchBookings = useCallback(async () => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchBookings();
+  }, [filter]);
+
+  const fetchBookings = async () => {
+    setLoading(true);
     try {
       const response = await adminAPI.getAllBookings(1, filter !== 'all' ? filter : '');
       setBookings(response.bookings || []);
     } catch (err) {
+      setError(err.message);
       console.error('Error fetching bookings:', err);
       // Fallback to mock data
       const mockBookings = [
@@ -69,12 +78,10 @@ const AllBookings = () => {
       }
     ];
       setBookings(mockBookings);
+    } finally {
+      setLoading(false);
     }
-  }, [filter]);
-
-  useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+  };
 
   const filteredBookings = filter === 'all' 
     ? bookings 

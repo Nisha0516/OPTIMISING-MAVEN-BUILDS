@@ -182,6 +182,13 @@ const EmergencyButton = ({ booking }) => {
     }
   };
 
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setLocation(null);
+    setLocationError(null);
+    clearLocationWatch();
+  };
+
   // Only show emergency button if there's an active booking
   if (!booking) {
     return null;

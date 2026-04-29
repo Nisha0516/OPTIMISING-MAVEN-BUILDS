@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { ownerAPI } from '../../services/api';
 import { toast } from 'react-toastify';
 import "./CarBookings.css";
@@ -6,9 +6,17 @@ import "./CarBookings.css";
 function CarBookings({ cars }) {
   const [filter, setFilter] = useState("all");
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [extensionRequests, setExtensionRequests] = useState([]);
-  
-  const fetchExtensionRequests = useCallback(async () => {
+  const [extensionsLoading, setExtensionsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchBookings();
+    fetchExtensionRequests();
+  }, []);
+
+  const fetchExtensionRequests = async () => {
+    setExtensionsLoading(true);
     try {
       console.log('Fetching extension requests...');
       const res = await ownerAPI.getExtensionRequests();
@@ -24,8 +32,10 @@ function CarBookings({ cars }) {
       console.log('Extension requests set (pending only):', pendingRequests);
     } catch (e) {
       console.error('Failed to fetch extension requests:', e);
+    } finally {
+      setExtensionsLoading(false);
     }
-  }, []);
+  };
 
   const normalizeStatus = (rawStatus) => {
     const value = (rawStatus || 'pending').toString().toLowerCase().trim();
@@ -43,7 +53,8 @@ function CarBookings({ cars }) {
     return 'pending';
   };
 
-  const fetchBookings = useCallback(async () => {
+  const fetchBookings = async () => {
+    setLoading(true);
     try {
       const response = await ownerAPI.getMyBookings();
       const normalizedBookings = (response.bookings || []).map(booking => ({
@@ -103,13 +114,10 @@ function CarBookings({ cars }) {
         status: normalizeStatus(booking.status),
       }));
       setBookings(normalizedSampleBookings);
+    } finally {
+      setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    fetchBookings();
-    fetchExtensionRequests();
-  }, [fetchBookings, fetchExtensionRequests]);
+  };
 
   const handleBookingAction = async (bookingId, action) => {
     try {

@@ -1,18 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Notifications, 
-  CheckCircle, 
-  Error, 
-  Celebration, 
-  Block, 
-  CreditCard, 
-  BrokenImage, 
-  Delete, 
-  DoneAll,
-  MarkEmailRead,
-  FilterList,
-  Inbox
-} from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
 import { notificationsAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import './CustomerNotifications.css';
@@ -22,12 +8,19 @@ const CustomerNotifications = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
-  const fetchNotifications = useCallback(async () => {
+  useEffect(() => {
+    fetchNotifications();
+  }, [filter]);
+
+  const fetchNotifications = async () => {
     setLoading(true);
     try {
       const response = await notificationsAPI.getNotifications();
+      console.log('Customer notifications:', response);
+      
       let filteredNotifications = response.notifications || [];
       
+      // Apply filter
       if (filter !== 'all') {
         filteredNotifications = filteredNotifications.filter(n => n.type === filter);
       }
@@ -35,23 +28,20 @@ const CustomerNotifications = () => {
       setNotifications(filteredNotifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      toast.error('Failed to retrieve updates');
+      toast.error('Failed to fetch notifications');
     } finally {
       setLoading(false);
     }
-  }, [filter]);
-
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+  };
 
   const markAsRead = async (notificationId) => {
     try {
       await notificationsAPI.markAsRead(notificationId);
       fetchNotifications();
-      toast.success('Marked as read');
+      toast.success('Notification marked as read');
     } catch (error) {
-      toast.error('Failed to update status');
+      console.error('Error marking notification as read:', error);
+      toast.error('Failed to mark notification as read');
     }
   };
 
@@ -59,9 +49,10 @@ const CustomerNotifications = () => {
     try {
       await notificationsAPI.markAllAsRead();
       fetchNotifications();
-      toast.success('Inbox cleared');
+      toast.success('All notifications marked as read');
     } catch (error) {
-      toast.error('Failed to clear inbox');
+      console.error('Error marking all notifications as read:', error);
+      toast.error('Failed to mark all notifications as read');
     }
   };
 
@@ -69,112 +60,121 @@ const CustomerNotifications = () => {
     try {
       await notificationsAPI.deleteNotification(notificationId);
       fetchNotifications();
-      toast.success('Notification removed');
+      toast.success('Notification deleted');
     } catch (error) {
-      toast.error('Failed to remove notification');
+      console.error('Error deleting notification:', error);
+      toast.error('Failed to delete notification');
     }
   };
 
   const getNotificationIcon = (type) => {
-    const iconStyle = { fontSize: 20 };
     switch (type) {
       case 'booking_extension_approved':
-        return <CheckCircle sx={{ ...iconStyle, color: '#10b981' }} />;
+        return '✅';
       case 'booking_extension_rejected':
-        return <Error sx={{ ...iconStyle, color: '#ef4444' }} />;
+        return '❌';
       case 'booking_confirmed':
-        return <Celebration sx={{ ...iconStyle, color: '#3b82f6' }} />;
+        return '🎉';
       case 'booking_rejected':
-        return <Block sx={{ ...iconStyle, color: '#64748b' }} />;
+        return '🚫';
       case 'payment_success':
-        return <CreditCard sx={{ ...iconStyle, color: '#10b981' }} />;
+        return '💳';
       case 'payment_failed':
-        return <BrokenImage sx={{ ...iconStyle, color: '#ef4444' }} />;
+        return '💔';
       default:
-        return <Notifications sx={{ ...iconStyle, color: '#3b82f6' }} />;
+        return '📢';
+    }
+  };
+
+  const getNotificationColor = (type) => {
+    switch (type) {
+      case 'booking_extension_approved':
+        return 'success';
+      case 'booking_extension_rejected':
+        return 'danger';
+      case 'booking_confirmed':
+        return 'primary';
+      case 'booking_rejected':
+        return 'warning';
+      case 'payment_success':
+        return 'success';
+      case 'payment_failed':
+        return 'danger';
+      default:
+        return 'secondary';
     }
   };
 
   if (loading) {
-    return (
-      <div className="luxury-notify-loading">
-        <div className="compact-spinner"></div>
-        <p>Syncing notifications...</p>
-      </div>
-    );
+    return <div className="loading">Loading notifications...</div>;
   }
 
   return (
-    <div className="luxury-notifications-container">
-      <header className="notify-v3-header">
-        <div className="notify-title-box">
-          <Notifications sx={{ color: '#3b82f6' }} />
-          <h3>Activity Feed</h3>
-        </div>
-        
-        <div className="notify-v3-actions">
-          <div className="luxury-filter-pill">
-            <FilterList sx={{ fontSize: 16, color: '#64748b' }} />
-            <select 
-              value={filter} 
-              onChange={(e) => setFilter(e.target.value)}
-            >
-              <option value="all">Global Activity</option>
-              <option value="booking_confirmed">Successful Bookings</option>
-              <option value="booking_rejected">Declined Requests</option>
-              <option value="payment_success">Payments</option>
-            </select>
-          </div>
-          
+    <div className="customer-notifications">
+      <div className="notifications-header">
+        <h3>📬 My Notifications</h3>
+        <div className="notifications-controls">
+          <select 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Notifications</option>
+            <option value="booking_extension_approved">Extension Approved</option>
+            <option value="booking_extension_rejected">Extension Rejected</option>
+            <option value="booking_confirmed">Booking Confirmed</option>
+            <option value="booking_rejected">Booking Rejected</option>
+            <option value="payment_success">Payment Success</option>
+            <option value="payment_failed">Payment Failed</option>
+          </select>
           <button 
             onClick={markAllAsRead}
-            className="btn-clear-inbox"
+            className="btn btn-secondary btn-sm"
             disabled={notifications.filter(n => !n.read).length === 0}
           >
-            <DoneAll sx={{ fontSize: 18 }} /> Clear Unread
+            Mark All Read
           </button>
         </div>
-      </header>
+      </div>
 
-      <div className="notify-v3-list">
+      <div className="notifications-list">
         {notifications.length === 0 ? (
-          <div className="empty-inbox-v3">
-            <div className="empty-icon-pulse">
-              <Inbox sx={{ fontSize: 48, color: '#1e293b' }} />
-            </div>
-            <h4>All Caught Up</h4>
-            <p>Your notifications will appear here as they arrive</p>
+          <div className="no-notifications">
+            <div className="no-notifications-icon">📭</div>
+            <h4>No notifications</h4>
+            <p>You don't have any notifications yet</p>
           </div>
         ) : (
           notifications.map((notification) => (
             <div 
               key={notification._id} 
-              className={`notify-v3-item ${notification.read ? 'is-read' : 'is-unread'}`}
+              className={`notification-item ${notification.read ? 'read' : 'unread'} ${getNotificationColor(notification.type)}`}
             >
-              <div className="item-v3-icon">
+              <div className="notification-icon">
                 {getNotificationIcon(notification.type)}
-                {!notification.read && <div className="unread-dot-v3"></div>}
               </div>
-              
-              <div className="item-v3-main">
-                <div className="item-v3-header">
+              <div className="notification-content">
+                <div className="notification-header">
                   <h4>{notification.title}</h4>
-                  <span className="item-v3-time">
-                    {new Date(notification.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    <span className="date-sep">•</span>
+                  <span className="notification-time">
                     {new Date(notification.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <p className="item-v3-body">{notification.message}</p>
-                
-                <div className="item-v3-actions">
+                <p className="notification-message">{notification.message}</p>
+                <div className="notification-actions">
                   {!notification.read && (
-                    <button onClick={() => markAsRead(notification._id)} className="btn-v3-read">
-                      <MarkEmailRead sx={{ fontSize: 14 }} /> Mark Read
+                    <button 
+                      onClick={() => markAsRead(notification._id)}
+                      className="btn btn-sm btn-outline-primary"
+                    >
+                      Mark as Read
                     </button>
                   )}
-                  <button onClick={() => deleteNotification(notification._id)} className="btn-v3-delete">
-                    <Delete sx={{ fontSize: 14 }} /> Remove
+                  <button 
+                    onClick={() => deleteNotification(notification._id)}
+                    className="btn btn-sm btn-outline-danger"
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
