@@ -52,7 +52,9 @@ jobs:
             ${{ runner.os }}-maven-build-cache-
 
       - name: Make Maven wrapper executable
-        run: chmod +x ./mvnw
+        run: |
+          chmod +x ./mvnw
+          sed -i 's/\r$//' ./mvnw
 
       - name: Build with Maven (skip tests)
         run: ./mvnw -B -DskipTests package
@@ -87,7 +89,9 @@ jobs:
             ${{ runner.os }}-maven-build-cache-
 
       - name: Make Maven wrapper executable
-        run: chmod +x ./mvnw
+        run: |
+          chmod +x ./mvnw
+          sed -i 's/\r$//' ./mvnw
 
       - name: Build and test with Maven
         run: ./mvnw -B verify
