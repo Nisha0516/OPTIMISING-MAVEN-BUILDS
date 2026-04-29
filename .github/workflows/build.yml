@@ -94,7 +94,7 @@ jobs:
           sed -i 's/\r$//' ./mvnw
 
       - name: Build and test with Maven
-        run: ./mvnw -B verify
+        run: ./mvnw -B -Dmaven.build.cache.enabled=false verify
 
       - name: Upload compiled classes
         if: success()
