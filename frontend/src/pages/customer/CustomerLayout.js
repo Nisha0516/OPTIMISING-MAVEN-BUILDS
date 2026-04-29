@@ -304,44 +304,7 @@ const CustomerLayout = ({ children }) => {
         activeBooking && activeBooking._id ? (
           <EmergencyButton booking={activeBooking} />
         ) : (
-          // Show button even without booking for testing, but it will show error when clicked
-          <div style={{
-            position: 'fixed',
-            bottom: '2rem',
-            right: '2rem',
-            zIndex: 99999
-          }}>
-            <button
-              onClick={() => {
-                alert('⚠️ No Active Booking\n\nTo use the emergency button:\n1. Book a car first\n2. Wait for booking approval\n3. Then the emergency button will work\n\nFor testing, you can create a booking from the home page.');
-              }}
-              style={{
-                background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '50px',
-                padding: '15px 25px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(220, 38, 38, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                animation: 'pulse 2s infinite'
-              }}
-              title="Emergency Assistance - No active booking"
-            >
-              <span style={{ fontSize: '24px' }}>🚨</span>
-              <span>Emergency</span>
-            </button>
-            <style>{`
-              @keyframes pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-              }
-            `}</style>
-          </div>
+          <EmergencyButton booking={{ _id: "000000000000000000000000", car: { name: 'Test Car (No Booking)' } }} />
         )
       )}
       

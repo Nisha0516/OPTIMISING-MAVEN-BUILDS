@@ -21,6 +21,8 @@
         <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.cache.enabled>true</maven.build.cache.enabled>
+        <maven.build.cache.skipCache>false</maven.build.cache.skipCache>
     </properties>
 
     <dependencies>

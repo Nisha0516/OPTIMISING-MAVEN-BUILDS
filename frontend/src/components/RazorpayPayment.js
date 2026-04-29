@@ -81,7 +81,7 @@ const RazorpayPayment = ({ bookingId, amount, onSuccess, onFailure, onClose }) =
         currency: order.currency,
         name: 'DriveFlex Car Rental',
         description: `Payment for Booking #${bookingId.substring(0, 8)}`,
-        order_id: order.id,
+        // order_id: order.id, // Removed so the Razorpay SDK doesn't reject our mocked order ID
         handler: async function (response) {
           try {
             setLoading(true);

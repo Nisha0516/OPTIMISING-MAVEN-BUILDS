@@ -33,9 +33,20 @@
                 <goalsList>
                     <goals>
                         <goal>test</goal>
+                        <goal>repackage</goal>
                     </goals>
                 </goalsList>
             </goalsLists>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
         </runAlways>
     </executionControl>
 </cache>
