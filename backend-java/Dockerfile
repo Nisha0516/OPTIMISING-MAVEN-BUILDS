@@ -8,6 +8,8 @@ WORKDIR /app
 COPY pom.xml .
 COPY .mvn ./.mvn
 COPY mvnw .
+RUN chmod +x ./mvnw \
+    && sed -i 's/\r$//' ./mvnw
 RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw -B dependency:go-offline -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 

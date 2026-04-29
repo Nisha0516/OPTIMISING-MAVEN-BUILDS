@@ -66,6 +66,20 @@ A full-stack MERN application for managing car rentals with separate dashboards 
 
 ---
 
+## ✅ DevOps Performance Proof (Maven Build Optimization)
+
+This repo includes an optimized Java backend in `backend-java/` with Maven wrapper + CI cache improvements.
+
+Build-time proof from `backend-java/BUILD_OPTIMIZATION_LOGS.md`:
+
+```text
+Before Optimization (clean compile, forced single-thread): 9.751 s
+After Optimization (incremental compile, no clean):        3.312 s
+Improvement: ~66%
+```
+
+---
+
 ## ⚡ Quick Start
 
 ### Prerequisites
