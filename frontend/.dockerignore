@@ -1,0 +1,11 @@
+node_modules
+build
+.env
+.npmrc
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+build*.txt
+start*.txt
+frontend_dev_*.log
