@@ -69,15 +69,33 @@ Why this is better:
 - old approach: cache key changed every commit, so reuse was weaker
 - new approach: cache is reused until the Maven build inputs actually change
 
-The CI job now runs:
+The full CI verify job now runs:
 
 ```bash
-./mvnw -B verify
+./mvnw -B -Dmaven.build.cache.enabled=false clean verify
 ```
 
-This is better for a DevOps demo because it exercises the full `verify` lifecycle. On a cold cache it runs the full build and tests; on a warm cache Maven can restore the verified outputs.
+This is better for artifact publishing because it exercises the full `verify` lifecycle and guarantees `target/classes` exists before `actions/upload-artifact` runs. Local developer builds still use the Maven build cache for fast repeated verification.
 
-### 6. Faster Docker builds
+### 6. Dependency cleanup
+
+The dependency tree was reviewed with:
+
+```powershell
+.\mvnw.cmd -B dependency:analyze
+```
+
+The main Spring Boot starters were kept because they provide required auto-configuration. The heavy Spring Boot test starters were removed because the current tests only need JUnit Jupiter. They were replaced with:
+
+```xml
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+### 7. Faster Docker builds
 
 The Dockerfile now uses BuildKit cache mounts for Maven:
 
